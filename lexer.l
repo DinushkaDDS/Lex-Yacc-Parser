@@ -1,24 +1,22 @@
-%x COMMENT_MULTI 
 
 %{
-    #include "parser.tab.h"
+  #include "parser.tab.h"
+  extern void yyerror();
+  extern int yylineno;
+  extern int errorCount;
+  extern int success();
 
-    void yyerror(char const *s) {
-      fprintf(stderr, "line %d: %s\n", yylineno, s);
-    }
-
-    extern int line_number;  
-    extern char* yytext;
 %}
-%option noyywrap    
+
+%x COMMENT_MULTI 
 
 %%
 
-<INITIAL>"/*"               {BEGIN(COMMENT_MULTI);}
+<INITIAL>"/*"               { BEGIN(COMMENT_MULTI);}
 <COMMENT_MULTI>"*/"         {BEGIN(INITIAL);}
 <COMMENT_MULTI><<EOF>>      {
                               yyerror("Unclosed Comment!");
-                              yyterminate();
+                              exit(EXIT_FAILURE);
                             }
 <COMMENT_MULTI>.            ;
 
@@ -50,7 +48,12 @@
 [a-zA-Z][a-zA-Z]*           return ID;
 [0-9]+                      return NUM;
 [ \t\r]+                    ;
-[\n]                        {line_number++;}
-.                           {yyerror("Error in Syntax!");}
+[\n]                        {yylineno++;}
+.                           {yyerror("Error in Syntax");}
 
 %%
+
+int yywrap(void){
+    return 1;
+}
+  
