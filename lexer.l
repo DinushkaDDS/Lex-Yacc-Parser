@@ -4,21 +4,20 @@
   extern void yyerror();
   extern int yylineno;
   extern int errorCount;
-  extern int success();
+  extern void success();
 
 %}
 
-%x COMMENT_MULTI 
+%x COMMENT_MULTI
 
 %%
 
-<INITIAL>"/*"               { BEGIN(COMMENT_MULTI);}
+<INITIAL>"/*"               {BEGIN(COMMENT_MULTI);}
 <COMMENT_MULTI>"*/"         {BEGIN(INITIAL);}
-<COMMENT_MULTI><<EOF>>      {
-                              yyerror("Unclosed Comment!");
-                              exit(EXIT_FAILURE);
-                            }
-<COMMENT_MULTI>.            ;
+<COMMENT_MULTI><<EOF>>      { yyerror("Unclosed Comment!"); exit(EXIT_SUCCESS);}
+<COMMENT_MULTI>.|"\n"       ;
+<INITIAL><<EOF>>            {success(); exit(EXIT_SUCCESS);}
+
 
 "if"                        return IF;
 "else"                      return ELSE;

@@ -4,16 +4,14 @@
   extern int yylineno;
   //extern int yydebug = 1;    Use this to enable the debug mode of lex
   void yyerror();
-  int yylex();
-  int success();
+  extern int yylex();
+  void success();
   int errorCount = 0;
   #define YYERROR_VERBOSE 1;
 %}
 
 
 // Tokens Definition to Hadle in the Grammar
-%token START_OF_COMMENT
-%token END_OF_COMMENT
 %token IF
 %token ELSE
 %token INT
@@ -47,16 +45,16 @@
 
 %%
 program: declaration-list;
-declaration-list: declaration-list declaration | declaration|error EOL| error RIGHT_PARANTHESIS;
-declaration: var-declaration | fun-declaration|error EOL| error RIGHT_PARANTHESIS;
+declaration-list: declaration-list declaration | declaration;
+declaration: var-declaration | fun-declaration;
 var-declaration: type-specifier ID EOL | type-specifier ID LEFT_SQR_BRACKET NUM RIGHT_SQR_BRACKET EOL |error EOL;
-type-specifier: INT | VOID|error EOL| error RIGHT_PARANTHESIS;
+type-specifier: INT | VOID;
 fun-declaration: type-specifier ID LEFT_BRACKET params RIGHT_BRACKET compound-stmt;
-params: param-list | VOID|error EOL| error RIGHT_PARANTHESIS;
-param-list: param-list COMMA param | param|error EOL| error RIGHT_PARANTHESIS;
-param: type-specifier ID | type-specifier ID LEFT_SQR_BRACKET RIGHT_SQR_BRACKET|error EOL| error RIGHT_PARANTHESIS;
-compound-stmt: LEFT_PARANTHESIS local-declarations statement-list RIGHT_PARANTHESIS|error EOL| error RIGHT_PARANTHESIS;
-local-declarations: local-declarations var-declaration | %empty|error EOL| error RIGHT_PARANTHESIS;
+params: param-list | VOID;
+param-list: param-list COMMA param | param;
+param: type-specifier ID | type-specifier ID LEFT_SQR_BRACKET RIGHT_SQR_BRACKET;
+compound-stmt: LEFT_PARANTHESIS local-declarations statement-list RIGHT_PARANTHESIS;
+local-declarations: local-declarations var-declaration | %empty;
 statement-list: statement-list statement | %empty;
 statement: expression-stmt | compound-stmt | selection-stmt | iteration-stmt |
 return-stmt;
@@ -65,14 +63,14 @@ selection-stmt: IF LEFT_BRACKET expression RIGHT_BRACKET statement | IF LEFT_BRA
 statement;
 iteration-stmt: WHILE LEFT_BRACKET expression RIGHT_BRACKET statement;
 return-stmt: RETURN EOL | RETURN expression EOL;
-expression: var ASSIGNMENT expression | simple-expression|error EOL| error RIGHT_PARANTHESIS;
-var: ID | ID LEFT_SQR_BRACKET expression RIGHT_SQR_BRACKET|error EOL| error RIGHT_PARANTHESIS;
+expression: var ASSIGNMENT expression | simple-expression;
+var: ID | ID LEFT_SQR_BRACKET expression RIGHT_SQR_BRACKET;
 simple-expression: additive-expression relop additive-expression | additive-expression;
-relop: LESS_THAN | LESS_OR_EQUAL | GREATER_THAN | GREATER_OR_EQUAL | EQUALS | NOT_EQUALS|error EOL| error RIGHT_PARANTHESIS;
+relop: LESS_THAN | LESS_OR_EQUAL | GREATER_THAN | GREATER_OR_EQUAL | EQUALS | NOT_EQUALS;
 additive-expression: additive-expression addop term | term;
-addop: PLUS | MINUS|error EOL| error RIGHT_PARANTHESIS;
+addop: PLUS | MINUS;
 term: term mulop factor | factor;
-mulop: MULTIPLY | DIVIDE|error EOL| error RIGHT_PARANTHESIS;
+mulop: MULTIPLY | DIVIDE;
 factor: LEFT_BRACKET expression RIGHT_BRACKET | var | call | NUM;
 call: ID LEFT_BRACKET args RIGHT_BRACKET;
 args: arg-list | %empty;
@@ -93,9 +91,9 @@ void yyerror(char const *s) {
 }
 
 //Checking number of errors of the Document to find the Success of the Parser.
-int success(void){
+void success(void){
   if(errorCount==0){
     fprintf(stderr, "Successfully Parsed!\n");
-    return 1;
+    return;
   }
 }
